@@ -12,6 +12,9 @@ void init_queue(struct queue *queue) {
 
 	pthread_mutex_init(&queue->head_l, NULL);
 	pthread_mutex_init(&queue->tail_l, NULL);
+
+	pthread_cond_init(&queue->can_enqueue, NULL);
+	pthread_cond_init(&queue->can_dequeue, NULL);
 }
 
 

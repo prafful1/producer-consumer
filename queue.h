@@ -9,9 +9,11 @@ struct queue_node {
 struct queue {
 	struct queue_node *head;
 	pthread_mutex_t head_l;
+	pthread_cond_t can_enqueue;
 
 	struct queue_node *tail;
 	pthread_mutex_t tail_l;
+	pthread_cond_t can_dequeue;
 
 	struct queue_node *node;
 };

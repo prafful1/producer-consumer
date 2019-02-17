@@ -7,13 +7,20 @@
 
 void *produce(void *queue) {
 
-	int i;
+	int i = 0;
 
-	for (i = 0; i < 10; i++) {
+	while (1) {
 		enqueue((struct queue *)queue, i);
 		printf("Added [%d] to queue\n", i);
+		i = (i+1)%200;
+
+		if (i == 200) {
+			pthread_cond_wait(&((struct queue *)queue)->can_enqueue, &((struct queue *)queue)->tail_l);
+			pthread_cond_signal(&((struct queue *)queue)->can_dequeue);
+		}
 	}
 
+	// Control never reaches here
 	return NULL;
 }
 
@@ -21,9 +28,16 @@ void *consume(void *queue) {
 
 	int res;
 
-	while ((res = dequeue((struct queue *)queue)) != -1)
+	while (1) {
+		res = dequeue((struct queue *)queue);
 		printf("Removed [%d] from queue\n", res);
+		if (res == -1) {
+			pthread_cond_wait(&((struct queue *)queue)->can_dequeue, &((struct queue *)queue)->head_l);
+			pthread_cond_signal(&((struct queue *)queue)->can_enqueue);
+		}
+	}
 
+	// Control never reaches here
 	return NULL;
 }
 int main() {
@@ -38,12 +52,6 @@ int main() {
 
 	pthread_create(&prod_t, NULL, produce, queue);
 	pthread_create(&cons_t, NULL, consume, queue);
-	pthread_join(prod_t, NULL);
-	pthread_join(cons_t, NULL);
 	
-	destroy_queue(queue);
-	free(queue);
-	queue = NULL;
-
-	return 0;
+	pthread_exit(0);
 }
