@@ -26,11 +26,11 @@ void destroy_queue(struct queue *queue) {
 		queue->head = queue->head->next;
 		free(node);
 	}
+	node = NULL;
 
 	queue->head = NULL;
 	queue->tail = NULL;
 	queue->node = NULL;
-
 }
 
 void enqueue(struct queue *queue, int data) {
